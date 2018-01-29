@@ -3,60 +3,45 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.views import View
 from django.contrib.auth import views as auth_views
-from django.contrib.auth.forms import UserCreationForm
 from .forms import CustomLoginForm
-from django.shortcuts import redirect
-from django.views.generic.edit import FormView
-from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_protect
-from django.views.decorators.debug import sensitive_post_parameters
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import (
-    REDIRECT_FIELD_NAME, get_user_model, login as auth_login,
-    logout as auth_logout, update_session_auth_hash,
-)
+
+from .forms import CustomUserCreationForm
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from .tokens import account_activation_token
+from django.core.mail import EmailMessage
+from django.contrib.auth.models import User
 
 
-class SignupViewOld(View):
+class SignupView(View):
     def post(self, request):
-        # form = EmailPostForm(request.POST)
-        # if form.is_valid():
-        #     cd = form.cleaned_data
-        #     send_mail('Sample Message', 'comment', 'test@test.com', list('mark@rushtonmd.com'))
-        return redirect('/admin')
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            current_site = get_current_site(request)
+            mail_subject = 'Activate your account... please.'
+            message = render_to_string('account/acc_active_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
+                'token': account_activation_token.make_token(user),
+            })
+            to_email = form.cleaned_data.get('username')
+            email = EmailMessage(mail_subject, message, to=[to_email])
+            email.send()
+            # send_mail('DJANGO TEST MESSAGE', 'Here is the body.', 'test@test.com', [to_email])
+            return HttpResponse('Please confirm your email address to complete the registration')
+        else:
+            return render(request, 'account/signup.html', {'form': form})
 
     def get(self, request):
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
 
         return render(request, 'account/signup.html', {'form': form})
-
-
-class SignupView(auth_views.PasswordContextMixin, FormView):
-    form_class = UserCreationForm
-    success_url = reverse_lazy('/')
-    template_name = 'account/signup.html'
-    title = _('Signup')
-
-    @method_decorator(sensitive_post_parameters())
-    @method_decorator(csrf_protect)
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-    def form_valid(self, form):
-        form.save()
-        # Updating the password logs out all other sessions for the user
-        # except the current one.
-        update_session_auth_hash(self.request, form.user)
-        return super().form_valid(form)
 
 
 class CustomLoginView(auth_views.LoginView):
@@ -74,6 +59,23 @@ class CustomLoginView(auth_views.LoginView):
     def form_valid(self, form):
 
         return super(CustomLoginView, self).form_valid(form)
+
+
+class ActivateUser(View):
+    def get(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+        except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+        if user is not None and account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            login(request, user)
+            # return redirect('home')
+            return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+        else:
+            return HttpResponse('Activation link is invalid!')
 
 
 def user_login(request):
