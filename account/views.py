@@ -13,6 +13,8 @@ from django.utils.encoding import force_bytes
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage
 from django.contrib.auth.models import User
+from django.views.generic.base import TemplateView
+from django.shortcuts import redirect
 
 
 class SignupView(View):
@@ -34,7 +36,7 @@ class SignupView(View):
             email = EmailMessage(mail_subject, message, to=[to_email])
             email.send()
             # send_mail('DJANGO TEST MESSAGE', 'Here is the body.', 'test@test.com', [to_email])
-            return HttpResponse('Please confirm your email address to complete the registration')
+            return redirect('needs_activation')
         else:
             return render(request, 'account/signup.html', {'form': form})
 
@@ -71,11 +73,34 @@ class ActivateUser(View):
         if user is not None and account_activation_token.check_token(user, token):
             user.is_active = True
             user.save()
-            login(request, user)
+            # login(request, user)
             # return redirect('home')
-            return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+            return redirect('activation_successful')
+            # return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
         else:
-            return HttpResponse('Activation link is invalid!')
+            return redirect('activation_invalid')
+            # return HttpResponse('Activation link is invalid!')
+
+
+class NeedsActivationView(TemplateView):
+    template_name = 'account/generic_message.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {'message': "Please check your email to active your account."})
+
+
+class AccountActivatedView(TemplateView):
+    template_name = 'account/generic_message.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {'message': "Your account has been successfully activated!"})
+
+
+class InvalidActivationView(TemplateView):
+    template_name = 'account/generic_message.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {'message': "Invalid activation link."})
 
 
 def user_login(request):

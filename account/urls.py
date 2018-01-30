@@ -17,6 +17,9 @@ from . import views
 
 urlpatterns = [
     path('signup/', views.SignupView.as_view(), name='signup'),
+    path('signup/needs-activation', views.NeedsActivationView.as_view(), name='needs_activation'),
+    path('signup/activation-successful', views.AccountActivatedView.as_view(), name='activation_successful'),
+    path('signup/activation-invalid', views.InvalidActivationView.as_view(), name='activation_invalid'),
     path('login/', auth_views.LoginView.as_view(template_name='account/login.html'), name='login'),
     path('activate/<uidb64>/<token>/', views.ActivateUser.as_view(), name='activate')
 

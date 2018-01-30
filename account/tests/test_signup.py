@@ -3,7 +3,7 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.core.exceptions import ObjectDoesNotExist
 
 
-class LoginTests(TestCase):
+class SignupTests(TestCase):
 
     def setUp(self):
         self.client.logout()
@@ -14,6 +14,13 @@ class LoginTests(TestCase):
 
     def test_page_loads_correct_template(self):
         self.assertTemplateUsed(self.response, 'account/signup.html')
+
+    def test_html_elements_exist(self):
+        self.assertContains(self.response, '<form', 1)
+        self.assertContains(self.response, 'method="post"', 1)
+        self.assertContains(self.response, 'type="email"', 1)
+        self.assertContains(self.response, 'type="password"', 2)
+        self.assertContains(self.response, 'type="submit"', 1)
 
     def test_new_user_is_created(self):
         # Ensure user doesn't exist
@@ -78,3 +85,13 @@ class LoginTests(TestCase):
 
         # Assert that the user was found
         self.assertFalse(newuser.is_active)
+
+    def test_valid_post_redirects_to_needs_activation(self):
+        # Create a post to the login page with the correct credentials
+        post_response = self.client.post('/account/signup/', {'username': 'testuser5@test.com', 'password1': '123qweasd', 'password2': '123qweasd'}, follow=True)
+
+        # The page should redirect
+        self.assertEqual(post_response.status_code, 200)
+
+        # The page should redirect to home
+        self.assertEqual(post_response.redirect_chain[0][0], '/account/signup/needs-activation')
