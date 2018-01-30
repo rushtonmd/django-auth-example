@@ -22,7 +22,7 @@ class AccountViewFactory():
     # The method needs to return a CLASS.as_view(), as you can't
     # call .as_view() on an instance
     #
-    def createSignupView():
+    def create_signup_view():
         signupView = SignupView
 
         # Override the attribute for EmailGenerator
@@ -33,6 +33,42 @@ class AccountViewFactory():
 
         # Return the view using the as_view() method
         return signupView.as_view()
+
+
+class PasswordResetViewFactory():
+    def create_password_form_view():
+        view = auth_views.PasswordResetView
+
+        view.template_name = 'password_reset/password_reset_form.html'
+        view.email_template_name = 'password_reset/password_reset_email.html'
+        view.subject_template_name = 'password_reset/password_reset_subject.txt'
+
+        return view.as_view()
+
+    def create_password_reset_done_view():
+        view = auth_views.PasswordResetDoneView
+
+        view.template_name = 'account/generic_message.html'
+        message = render_to_string('password_reset/password_reset_done.html')
+        view.extra_context = {'message': message}
+
+        return view.as_view()
+
+    def create_password_reset_complete_view():
+        view = auth_views.PasswordResetCompleteView
+
+        view.template_name = 'account/generic_message.html'
+        message = render_to_string('password_reset/password_reset_complete.html')
+        view.extra_context = {'message': message}
+
+        return view.as_view()
+
+    def create_password_reset_confirm_view():
+        view = auth_views.PasswordResetConfirmView
+
+        view.template_name = 'password_reset/password_reset_confirm.html'
+
+        return view.as_view()
 
 
 class SignupView(View):

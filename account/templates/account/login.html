@@ -25,7 +25,10 @@
         <div class="invalid-feedback">
           Please enter a password.
         </div>
-        <button class="mt-4 btn btn-lg btn-primary btn-block" type="submit">Sign in</button><a href="{% url 'signup' %}"> or register</a>
+        <button class="mt-4 btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <a href="{% url 'signup' %}"> register</a>
+        <br>
+        <a href="{% url 'password_reset' %}">reset your password</a>
       </form>
     </div>
 </div>
@@ -55,11 +58,5 @@
 })();
 </script>
 
-
-<script>
-{% if not user.is_authenticated %}
-$("ul.nav.navbar-nav.navbar-right").css("display","none");
-{% endif %}
-</script>
 
 {% endblock %}
