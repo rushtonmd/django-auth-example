@@ -17,25 +17,49 @@ from django.views.generic.base import TemplateView
 from django.shortcuts import redirect
 
 
+class AccountViewFactory():
+    # Define a method to create a SignupView
+    # The method needs to return a CLASS.as_view(), as you can't
+    # call .as_view() on an instance
+    #
+    def createSignupView():
+        signupView = SignupView
+
+        # Override the attribute for EmailGenerator
+        signupView.EmailGenerator = EmailMessage
+
+        # Override the class attribute for SignupForm
+        signupView.SignupForm = CustomUserCreationForm
+
+        # Return the view using the as_view() method
+        return signupView.as_view()
+
+
 class SignupView(View):
+    EmailGenerator = EmailMessage
+    SignupForm = CustomUserCreationForm
+
+    def send_email(self, request, user, form):
+        email_generator = SignupView.EmailGenerator
+        mail_subject = 'Activate your account... please.'
+        current_site = get_current_site(request)
+        message = render_to_string('account/acc_active_email.html', {
+            'user': user,
+            'domain': current_site.domain,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
+            'token': account_activation_token.make_token(user),
+        })
+        to_email = form.cleaned_data.get('username')
+        email = email_generator(mail_subject, message, to=[to_email])
+        email.send()
+
     def post(self, request):
-        form = CustomUserCreationForm(request.POST)
+        form = SignupView.SignupForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.is_active = False
             user.save()
-            current_site = get_current_site(request)
-            mail_subject = 'Activate your account... please.'
-            message = render_to_string('account/acc_active_email.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
-                'token': account_activation_token.make_token(user),
-            })
-            to_email = form.cleaned_data.get('username')
-            email = EmailMessage(mail_subject, message, to=[to_email])
-            email.send()
-            # send_mail('DJANGO TEST MESSAGE', 'Here is the body.', 'test@test.com', [to_email])
+            self.send_email(request, user, form)
             return redirect('needs_activation')
         else:
             return render(request, 'account/signup.html', {'form': form})
@@ -103,20 +127,8 @@ class InvalidActivationView(TemplateView):
         return render(request, self.template_name, {'message': "Invalid activation link."})
 
 
-def user_login(request):
-    if request.method == 'POST':
-        form = CustomLoginForm(request.POST)
-        if form.is_valid():
-            cd = form.cleaned_data
-            user = authenticate(username=cd['username'], password=cd['password'])
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return HttpResponse('Authenticated successfully')
-                else:
-                    return HttpResponse('Disabled account')
-            else:
-                return HttpResponse('Invalid login')
-    else:
-        form = CustomLoginForm()
-    return render(request, 'account/login.html', {'form': form})
+class CustomLogoutView(auth_views.LogoutView):
+    template_name = 'account/generic_message.html'
+
+    def get(self, request):
+        return render(request, self.template_name, {'message': "You have been logged out!"})
