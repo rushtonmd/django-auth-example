@@ -15,24 +15,145 @@ from django.core.mail import EmailMessage
 from django.contrib.auth.models import User
 from django.views.generic.base import TemplateView
 from django.shortcuts import redirect
+from django.urls import reverse_lazy
 
 
 class AccountViewFactory():
-    # Define a method to create a SignupView
-    # The method needs to return a CLASS.as_view(), as you can't
-    # call .as_view() on an instance
-    #
-    def create_signup_view():
-        signupView = SignupView
+    account_types = (
+        'signup',
+        'needs_activation',
+        'activation_successful',
+        'activation_invalid',
+        'logout',
+        'login',
+        'activate',
+        'password_change',
+        'password_change_done',
+        )
 
-        # Override the attribute for EmailGenerator
-        signupView.EmailGenerator = EmailMessage
+    @classmethod
+    def create_signup(cls, **kwargs):
+        # Get the SignupView class
+        view = SignupView
 
-        # Override the class attribute for SignupForm
-        signupView.SignupForm = CustomUserCreationForm
+        # Return the updated SignupView as a view
+        return view.as_view(**kwargs)
 
-        # Return the view using the as_view() method
-        return signupView.as_view()
+    @classmethod
+    def create_needs_activation(cls, **kwargs):
+        # Get the GenericMessageView class
+        view = GenericMessageView
+
+        # Set the default message
+        default_message = {'message': 'Please check your email to active your account.'}
+
+        # Combine the keyword arguments
+        combined_args = {**default_message, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
+    def create_activation_successful(cls, **kwargs):
+        # Get the GenericMessageView class
+        view = GenericMessageView
+
+        # Set the default message
+        default_message = {'message': 'Your account has been successfully activated!'}
+
+        # Combine the keyword arguments
+        combined_args = {**default_message, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
+    def create_activation_invalid(cls, **kwargs):
+        # Get the GenericMessageView class
+        view = GenericMessageView
+
+        # Set the default message
+        default_message = {'message': 'Invalid activation link.'}
+
+        # Combine the keyword arguments
+        combined_args = {**default_message, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
+    def create_logout(cls, **kwargs):
+        # Get the GenericMessageView class
+        view = CustomLogoutView
+
+        # Set the default args
+        default_args = {
+            'message': 'You have been successfully logged out.',
+            'next_page': reverse_lazy('login'),
+            }
+
+        # Combine the keyword arguments
+        combined_args = {**default_args, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
+    def create_login(cls, **kwargs):
+        # Get the GenericMessageView class
+        view = auth_views.LoginView
+
+        # Set the default args
+        default_args = {'template_name': 'account/login.html'}
+
+        # Combine the keyword arguments
+        combined_args = {**default_args, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
+    def create_activate(cls, **kwargs):
+        # Get the ActivateUser class
+        view = ActivateUser
+
+        # Return the updated view with the combined args
+        return view.as_view(**kwargs)
+
+    @classmethod
+    def create_password_change(cls, **kwargs):
+        # Get the ActivateUser class
+        view = auth_views.PasswordChangeView
+
+        # Set the default args
+        default_args = {'template_name': 'password_reset/password_change_form.html'}
+
+        # Combine the keyword arguments
+        combined_args = {**default_args, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
+    def create_password_change_done(cls, **kwargs):
+        # Get the ActivateUser class
+        view = GenericMessageView
+
+        # Set the default message
+        default_message = {'message': 'Password Change Complete!'}
+
+        # Combine the keyword arguments
+        combined_args = {**default_message, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
+    def create_view(cls, type, **kwargs):
+        if type not in cls.account_types:
+            return None
+
+        return getattr(cls, 'create_' + type)(**kwargs)
 
 
 class PasswordResetViewFactory():
@@ -72,99 +193,76 @@ class PasswordResetViewFactory():
 
 
 class SignupView(View):
-    EmailGenerator = EmailMessage
-    SignupForm = CustomUserCreationForm
+    email_generator = EmailMessage
+    signup_form = CustomUserCreationForm
+    needs_activation_template = 'needs_activation'
+    template_name = 'account/signup.html'
+    email_template_name = 'account/signup_email.html'
+    subject_template_name = 'account/signup_email_subject.txt'
 
     def send_email(self, request, user, form):
-        email_generator = SignupView.EmailGenerator
-        mail_subject = 'Activate your account... please.'
+        mail_subject = render_to_string(self.subject_template_name).strip('\n')
         current_site = get_current_site(request)
-        message = render_to_string('account/acc_active_email.html', {
+        message = render_to_string(self.email_template_name, {
             'user': user,
             'domain': current_site.domain,
             'uid': urlsafe_base64_encode(force_bytes(user.pk)).decode(),
             'token': account_activation_token.make_token(user),
         })
         to_email = form.cleaned_data.get('username')
-        email = email_generator(mail_subject, message, to=[to_email])
+        email = self.email_generator(mail_subject, message, to=[to_email])
         email.send()
 
     def post(self, request):
-        form = SignupView.SignupForm(request.POST)
+        form = self.signup_form(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.is_active = False
             user.save()
             self.send_email(request, user, form)
-            return redirect('needs_activation')
+            return redirect(self.needs_activation_template)
         else:
-            return render(request, 'account/signup.html', {'form': form})
+            return render(request, self.template_name, {'form': form})
 
     def get(self, request):
-        form = CustomUserCreationForm()
+        form = self.signup_form()
 
-        return render(request, 'account/signup.html', {'form': form})
-
-
-class CustomLoginView(auth_views.LoginView):
-    """
-    Custom login view.
-    """
-
-    form_class = CustomLoginForm
-    template_name = 'account/login.html'
-
-    def get(self, request, *args, **kwargs):
-
-        return super(CustomLoginView, self).get(request, *args, **kwargs)
-
-    def form_valid(self, form):
-
-        return super(CustomLoginView, self).form_valid(form)
+        return render(request, self.template_name, {'form': form})
 
 
 class ActivateUser(View):
+    # Set the initial value for the redirect path on a succesful activation
+    redirect_success = 'activation_successful'
+
+    # Set the initial value for the redirect path on an invalid activation
+    redirect_invalid = 'activation_invalid'
+
     def get(self, request, uidb64, token):
         try:
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
         except(TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
+
         if user is not None and account_activation_token.check_token(user, token):
             user.is_active = True
             user.save()
-            # login(request, user)
-            # return redirect('home')
-            return redirect('activation_successful')
-            # return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+            return redirect(self.redirect_success)
         else:
-            return redirect('activation_invalid')
-            # return HttpResponse('Activation link is invalid!')
+            return redirect(self.redirect_invalid)
 
 
-class NeedsActivationView(TemplateView):
+class GenericMessageView(TemplateView):
     template_name = 'account/generic_message.html'
+    message = ''
 
     def get(self, request):
-        return render(request, self.template_name, {'message': "Please check your email to active your account."})
-
-
-class AccountActivatedView(TemplateView):
-    template_name = 'account/generic_message.html'
-
-    def get(self, request):
-        return render(request, self.template_name, {'message': "Your account has been successfully activated!"})
-
-
-class InvalidActivationView(TemplateView):
-    template_name = 'account/generic_message.html'
-
-    def get(self, request):
-        return render(request, self.template_name, {'message': "Invalid activation link."})
+        return render(request, self.template_name, {'message': self.message})
 
 
 class CustomLogoutView(auth_views.LogoutView):
     template_name = 'account/generic_message.html'
+    message = ''
 
     def get(self, request):
-        return render(request, self.template_name, {'message': "You have been logged out!"})
+        return render(request, self.template_name, {'message': self.message})

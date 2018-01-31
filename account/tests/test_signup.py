@@ -86,6 +86,17 @@ class SignupTests(TestCase):
         # Assert that the user was found
         self.assertFalse(newuser.is_active)
 
+    def test_new_user_has_password(self):
+
+        # Create a post to the login page with the correct credentials
+        self.client.post('/account/signup/', {'username': 'testuser4@test.com', 'password1': '123qweasd', 'password2': '123qweasd'})
+
+        # Get the newly created user
+        newuser = User.objects.get(username='testuser4@test.com')
+
+        # Assert that the user was found
+        self.assertIsNotNone(newuser.password)
+
     def test_valid_post_redirects_to_needs_activation(self):
         # Create a post to the login page with the correct credentials
         post_response = self.client.post('/account/signup/', {'username': 'testuser5@test.com', 'password1': '123qweasd', 'password2': '123qweasd'}, follow=True)
