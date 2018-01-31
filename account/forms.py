@@ -1,21 +1,12 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from django import forms
 
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.db import models
 
 
-class CustomLoginForm(forms.Form):
-    username = forms.CharField(label="Username", max_length=30,
-                               widget=forms.TextInput(attrs={'class': 'form-control', 'name': 'username'}))
-    password = forms.CharField(label="Password", max_length=30,
-                               widget=forms.TextInput(attrs={'class': 'form-control', 'name': 'password'}))
-
-
 class CustomUserCreationForm(UserCreationForm):
-    # email = EmailField(label=_("Email address"), required=True, help_text=_("Required."))
 
     class Meta:
         model = User

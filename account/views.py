@@ -1,9 +1,6 @@
-from django.http import HttpResponse
 from django.shortcuts import render
-from django.contrib.auth import authenticate, login
 from django.views import View
 from django.contrib.auth import views as auth_views
-from .forms import CustomLoginForm
 
 from .forms import CustomUserCreationForm
 from django.contrib.sites.shortcuts import get_current_site
@@ -29,6 +26,10 @@ class AccountViewFactory():
         'activate',
         'password_change',
         'password_change_done',
+        'password_reset',
+        'password_reset_done',
+        'password_reset_confirm',
+        'password_reset_complete',
         )
 
     @classmethod
@@ -149,47 +150,80 @@ class AccountViewFactory():
         return view.as_view(**combined_args)
 
     @classmethod
+    def create_password_reset(cls, **kwargs):
+        # Get the ActivateUser class
+        view = auth_views.PasswordResetView
+
+        # Set the default message
+        default_args = {
+            'template_name': 'password_reset/password_reset_form.html',
+            'email_template_name': 'password_reset/password_reset_email.html',
+            'subject_template_name': 'password_reset/password_reset_subject.txt'}
+
+        # Combine the keyword arguments
+        combined_args = {**default_args, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
+    def create_password_reset_done(cls, **kwargs):
+        # Get the ActivateUser class
+        view = auth_views.PasswordResetDoneView
+
+        # Create the message
+        message = render_to_string('password_reset/password_reset_done.html')
+
+        # Set the default message
+        default_args = {
+            'template_name': 'account/generic_message.html',
+            'extra_context': {'message': message}}
+
+        # Combine the keyword arguments
+        combined_args = {**default_args, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
+    def create_password_reset_confirm(cls, **kwargs):
+        # Get the ActivateUser class
+        view = auth_views.PasswordResetConfirmView
+
+        # Set the default message
+        default_args = {'template_name': 'password_reset/password_reset_confirm.html'}
+
+        # Combine the keyword arguments
+        combined_args = {**default_args, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
+    def create_password_reset_complete(cls, **kwargs):
+        # Get the ActivateUser class
+        view = auth_views.PasswordResetCompleteView
+
+        # Create the message
+        message = render_to_string('password_reset/password_reset_complete.html')
+
+        # Set the default message
+        default_args = {
+            'template_name': 'account/generic_message.html',
+            'extra_context': {'message': message}}
+
+        # Combine the keyword arguments
+        combined_args = {**default_args, **kwargs}
+
+        # Return the updated view with the combined args
+        return view.as_view(**combined_args)
+
+    @classmethod
     def create_view(cls, type, **kwargs):
         if type not in cls.account_types:
             return None
 
         return getattr(cls, 'create_' + type)(**kwargs)
-
-
-class PasswordResetViewFactory():
-    def create_password_form_view():
-        view = auth_views.PasswordResetView
-
-        view.template_name = 'password_reset/password_reset_form.html'
-        view.email_template_name = 'password_reset/password_reset_email.html'
-        view.subject_template_name = 'password_reset/password_reset_subject.txt'
-
-        return view.as_view()
-
-    def create_password_reset_done_view():
-        view = auth_views.PasswordResetDoneView
-
-        view.template_name = 'account/generic_message.html'
-        message = render_to_string('password_reset/password_reset_done.html')
-        view.extra_context = {'message': message}
-
-        return view.as_view()
-
-    def create_password_reset_complete_view():
-        view = auth_views.PasswordResetCompleteView
-
-        view.template_name = 'account/generic_message.html'
-        message = render_to_string('password_reset/password_reset_complete.html')
-        view.extra_context = {'message': message}
-
-        return view.as_view()
-
-    def create_password_reset_confirm_view():
-        view = auth_views.PasswordResetConfirmView
-
-        view.template_name = 'password_reset/password_reset_confirm.html'
-
-        return view.as_view()
 
 
 class SignupView(View):
