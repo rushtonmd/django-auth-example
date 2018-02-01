@@ -1,10 +1,12 @@
 from django.urls import path
-from .views import AccountViewFactory, PasswordResetViewFactory
+from .views import AccountViewFactory
 
-# TODOs Here are all the auth views that need to be created
+# Reference Links: Auth Views
 # https://docs.djangoproject.com/en/2.0/topics/auth/default/#module-django.contrib.auth.views
 # Code: https://github.com/django/django/blob/master/django/contrib/auth/views.py
 
+# TODOs
+# Add a user profile model and views
 
 urlpatterns = [
     path('signup/', AccountViewFactory.create_view('signup'), name='signup'),
