@@ -30,6 +30,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
 
+# Add a single host from env variables if it exists
+if os.environ.get("ALLOWED_HOST") is not None:
+    ALLOWED_HOSTS.append(os.environ.get("ALLOWED_HOST"))
+
 
 # Application definition
 
