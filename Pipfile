@@ -1,0 +1,26 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+chromedriver-installer = "==0.0.6"
+coverage = "==4.4.2"
+cycler = "==0.10.0"
+dj-database-url = "==0.4.2"
+django = "==2.0.1"
+gunicorn = "==19.7.1"
+matplotlib = "==2.1.2"
+numpy = "==1.14.0"
+pyparsing = "==2.2.0"
+python-dateutil = "==2.6.1"
+pytz = "==2017.3"
+selenium = "==3.8.1"
+whitenoise = "*"
+
+
+[dev-packages]
+
