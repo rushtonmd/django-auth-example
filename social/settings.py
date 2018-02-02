@@ -11,13 +11,15 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-from .secret_settings import *
+# from .secret_settings import *
 from django.urls import reverse_lazy
 import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Set the SECRET_KEY
+# SECRET_KEY = os.environ["SOME_SECRET_KEY"]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
