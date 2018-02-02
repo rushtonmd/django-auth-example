@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-# from .secret_settings import *
 from django.urls import reverse_lazy
 import dj_database_url
 
