@@ -145,3 +145,16 @@ STATICFILES_DIRS = (
 
 LOGIN_URL = reverse_lazy('login')
 LOGIN_REDIRECT_URL = '/'
+
+
+# Setup Email
+DEFAULT_FROM_EMAIL = 'Sample Django Auth <noreply>'
+
+if os.environ.get("SENDGRID_USERNAME") is not None:
+    EMAIL_HOST = 'smtp.sendgrid.net'
+    EMAIL_HOST_USER = os.environ.get("SENDGRID_USERNAME")
+    EMAIL_HOST_PASSWORD = os.environ.get("SENDGRID_PASSWORD")
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # During development only
