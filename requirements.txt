@@ -11,3 +11,4 @@ python-dateutil==2.6.1
 pytz==2017.3
 selenium==3.8.1
 six==1.11.0
+psycopg2==2.4.4
