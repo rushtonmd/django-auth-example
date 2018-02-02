@@ -19,7 +19,9 @@
       <img src="{% static 'user-profile-placeholder.png' %}" class="header-profile-image rounded-circle mr-2">
       <a class="account-signout-link" href="{% url 'logout' %}">Sign out</a>
     {% else %}
-      <a class="account-signin-link" href="{% url 'login' %}">Sign in</a>
+      <a class="account-signin-link mr-2" href="{% url 'login' %}">Sign in</a>
+      or
+      <a class="btn btn-light account-register-link ml-2" href="{% url 'login' %}">Sign up</a>
     {% endif %}
   </div>
 
