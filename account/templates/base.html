@@ -14,7 +14,6 @@
 <body>
   <div class="d-flex flex-column flex-md-row align-items-center p-2 px-md-4 mb-3 bg-white border-bottom box-shadow account-header">
      <h5 class="my-0 mr-md-auto font-weight-normal">Sample Django Auth</h5>
-     </nav>
     {% if user.is_authenticated %}
       <img src="{% static 'user-profile-placeholder.png' %}" class="header-profile-image rounded-circle mr-2">
       <a class="account-signout-link" href="{% url 'logout' %}">Sign out</a>

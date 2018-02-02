@@ -1,16 +1,26 @@
-{% load staticfiles %}
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Social Home</title>
-    <link rel="stylesheet" href="{% static "site.css" %}">
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.0.0/flatly/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}" />
+  <title>Site Home</title>
+
 </head>
 <body>
-    <section class="row">
-        <header class="large-12 columns">
-            <h1>Social Home</h1>
-            <hr>
-        </header>
-    </section>
+  <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
+    <div class="col-md-5 p-lg-5 mx-auto my-5">
+      <h1 class="display-4 font-weight-normal">Sample Django Auth App</h1>
+      <p class="lead font-weight-normal">This is a simple application to demonstrate the Django auth user flow.</p>
+      <a class="btn btn-outline-secondary btn-lg mt-3" href="{% url 'signup' %}">Register</a><br>
+      <a class="" href="{% url 'login' %}">or sign in</a>
+    </div>
+    <div class="product-device box-shadow d-none d-md-block"></div>
+    <div class="product-device product-device-2 box-shadow d-none d-md-block"></div>
+  </div>
 </body>
 </html>
