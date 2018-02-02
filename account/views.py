@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from django.views.generic.base import TemplateView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.contrib.auth import logout
 
 
 # AccountViewFactory
@@ -413,6 +414,9 @@ class CustomLogoutView(auth_views.LogoutView):
 
     # Override the get method of the base class LogoutView
     def get(self, request):
+
+        # Logout the user
+        logout(request)
 
         # Return the template with the message
         return render(request, self.template_name, {'message': self.message})

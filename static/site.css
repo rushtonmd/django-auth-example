@@ -1,3 +1,7 @@
 .form-signin {
   min-width: 300px;
 }
+
+img.header-profile-image {
+  height: 37px;
+}
