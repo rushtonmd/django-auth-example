@@ -149,6 +149,7 @@ LOGIN_REDIRECT_URL = '/'
 # Setup Email
 DEFAULT_FROM_EMAIL = 'Sample Django Auth <noreply>'
 
+# If there are SENDGRID email credentials, use them. Otherwise use the default backend
 if os.environ.get("SENDGRID_USERNAME") is not None:
     EMAIL_HOST = 'smtp.sendgrid.net'
     EMAIL_HOST_USER = os.environ.get("SENDGRID_USERNAME")
@@ -157,3 +158,11 @@ if os.environ.get("SENDGRID_USERNAME") is not None:
     EMAIL_USE_TLS = True
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # During development only
+
+
+# secret_settings.py Holds local settings that will be placed into
+# env variables when on Heroku
+try:
+    from .secret_settings import *
+except ImportError:
+    pass
