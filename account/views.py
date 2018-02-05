@@ -17,6 +17,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.files.storage import FileSystemStorage
 
 
 # AccountViewFactory
@@ -445,8 +446,10 @@ class ProfileEditView(LoginRequiredMixin, TemplateView):
     # Override the post method from the base View class
     def post(self, request):
 
+        print(request.FILES)
+
         # Get the form from the request
-        form = self.profile_form(data=request.POST, instance=request.user.profile)
+        form = self.profile_form(request.POST, request.FILES, instance=request.user.profile)
 
         if form.is_valid():
 

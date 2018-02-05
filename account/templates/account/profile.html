@@ -18,15 +18,20 @@
 <div class="row justify-content-md-center">
   <div class="col-md-auto">
       <h1>Profile</h1>
-      <form class="m-1 form-signin needs-validation" method="post" action="" name="ResetForm" novalidate>
+      <form class="m-1 form-signin needs-validation" method="post" action="" name="ProfileForm" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         <div class="form-group">
-          <label for="inputEmail" class="">Email address</label>
+          <label for="inputEmail" class="">Email Address</label>
           <input class="form-control" type="email" id="id_email" name="email"  placeholder="Email" readonly value="{{ request.user.email }}">
         </div>
         <div class="form-group">
           <label for="" class="">Password</label><br>
           <a class="btn btn-light" href="{% url 'password_change' %}">Change Password</a>
+        </div>
+        <div class="form-group">
+          <label for="id_photo" class="">Profile Photo</label><br>
+          <img class="mx-auto mb-2 ml-1 rounded-circle" src="{{ request.user.profile.photo.url }}" alt="" width="120" height="120">
+          <input type="file" class="form-control-file" name="photo" id="id_photo">
         </div>
         <div class="form-group">
           <label for="id_bio" class="">Bio</label><br>

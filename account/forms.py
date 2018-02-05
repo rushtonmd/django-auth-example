@@ -35,4 +35,4 @@ class CustomUserCreationForm(UserCreationForm):
 class ProfileEditForm(ModelForm):
     class Meta:
         model = Profile
-        fields = ('bio',)
+        fields = ('bio', 'photo')
