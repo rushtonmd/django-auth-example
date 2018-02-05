@@ -454,7 +454,7 @@ class ProfileEditView(LoginRequiredMixin, TemplateView):
             form.save()
 
             # Render the template (form) again, which will display the errors
-            return render(request, self.template_name, {'form': form, 'saved_successfully': 'Your profile has been updated!'})
+            return redirect('/account/profile?' + 'saved_successfully=true', {'form': form})
 
         else:
             # Render the template (form) again, which will display the errors
@@ -462,8 +462,10 @@ class ProfileEditView(LoginRequiredMixin, TemplateView):
 
     def get(self, request):
 
+        saved = request.GET.get('saved_successfully', None)
+
         # Return the profile edit template and form
         form = self.profile_form(initial={'bio': request.user.profile.bio})
 
         # Render the appropriate template, and send the profile edit form
-        return render(request, self.template_name, {'form': form})
+        return render(request, self.template_name, {'form': form, 'saved_successfully': saved})

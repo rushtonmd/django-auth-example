@@ -16,8 +16,12 @@
     <div class="col-md-5 p-lg-5 mx-auto my-5">
       <h1 class="display-4 font-weight-normal">Sample Django Auth App</h1>
       <p class="lead font-weight-normal">This is a simple application to demonstrate the Django auth user flow.</p>
-      <a class="btn btn-outline-secondary btn-lg mt-3" href="{% url 'signup' %}">Register</a><br>
-      <a class="" href="{% url 'login' %}">or sign in</a>
+      {% if user.is_authenticated %}
+        <a class="btn btn-outline-secondary btn-lg mt-3" href="{% url 'profile' %}">View Profile</a><br>
+      {% else %}
+        <a class="btn btn-outline-secondary btn-lg mt-3" href="{% url 'signup' %}">Register</a><br>
+        <a class="" href="{% url 'login' %}">or sign in</a>
+      {% endif %}
     </div>
     <div class="product-device box-shadow d-none d-md-block"></div>
     <div class="product-device product-device-2 box-shadow d-none d-md-block"></div>
