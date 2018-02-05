@@ -446,8 +446,6 @@ class ProfileEditView(LoginRequiredMixin, TemplateView):
     # Override the post method from the base View class
     def post(self, request):
 
-        print(request.FILES)
-
         # Get the form from the request
         form = self.profile_form(request.POST, request.FILES, instance=request.user.profile)
 
