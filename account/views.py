@@ -3,6 +3,7 @@ from django.views import View
 from django.contrib.auth import views as auth_views
 
 from .forms import CustomUserCreationForm
+from .forms import ProfileEditForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
@@ -15,6 +16,7 @@ from django.views.generic.base import TemplateView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.contrib.auth import logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 # AccountViewFactory
@@ -40,6 +42,7 @@ class AccountViewFactory():
         'password_reset_done',
         'password_reset_confirm',
         'password_reset_complete',
+        'profile',
         )
 
     @classmethod
@@ -227,6 +230,15 @@ class AccountViewFactory():
 
         # Return the updated view with the combined args
         return view.as_view(**combined_args)
+
+    @classmethod
+    def create_profile(cls, **kwargs):
+
+        # Get the ProfileEditView view
+        view = ProfileEditView
+
+        # Return the updated view with the combined args
+        return view.as_view(**kwargs)
 
     @classmethod
     def create_view(cls, type, **kwargs):
@@ -420,3 +432,37 @@ class CustomLogoutView(auth_views.LogoutView):
 
         # Return the template with the message
         return render(request, self.template_name, {'message': self.message})
+
+
+class ProfileEditView(LoginRequiredMixin, TemplateView):
+
+    # Set the template name
+    template_name = 'account/profile.html'
+
+    # Set the profile edit form type
+    profile_form = ProfileEditForm
+
+    # Override the post method from the base View class
+    def post(self, request):
+
+        # Get the form from the request
+        form = self.profile_form(data=request.POST, instance=request.user.profile)
+
+        if form.is_valid():
+
+            form.save()
+
+            # Render the template (form) again, which will display the errors
+            return render(request, self.template_name, {'form': form, 'saved_successfully': 'Your profile has been updated!'})
+
+        else:
+            # Render the template (form) again, which will display the errors
+            return render(request, self.template_name, {'form': form})
+
+    def get(self, request):
+
+        # Return the profile edit template and form
+        form = self.profile_form(initial={'bio': request.user.profile.bio})
+
+        # Render the appropriate template, and send the profile edit form
+        return render(request, self.template_name, {'form': form})

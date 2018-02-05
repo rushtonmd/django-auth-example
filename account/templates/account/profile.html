@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{% if form.errors %}
+<div class="alert alert-danger" role="alert">
+  Hmm... something is afoot. Please try your username and password again.
+</div>
+{% endif %}
+
+{% if saved_successfully %}
+<div class="alert alert-success" role="alert">
+  {{ saved_successfully }}
+</div>
+{% endif %}
+
+<div class="row justify-content-md-center">
+  <div class="col-md-auto">
+      <h1>Profile</h1>
+      <form class="m-1 form-signin needs-validation" method="post" action="" name="ResetForm" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="inputEmail" class="">Email address</label>
+          <input class="form-control" type="email" id="id_email" name="email"  placeholder="Email" readonly value="{{ request.user.email }}">
+        </div>
+        <div class="form-group">
+          <label for="" class="">Password</label><br>
+          <a class="btn btn-light" href="{% url 'password_change' %}">Change Password</a>
+        </div>
+        <div class="form-group">
+          <label for="id_bio" class="">Bio</label><br>
+          <textarea class="form-control" id="id_bio" rows="3" name="bio" maxlength="500" rows="10">{{ request.user.profile.bio }}</textarea>
+        </div>
+        <div class="invalid-feedback">
+          Please enter a valid email address.
+        </div>
+        <button class="mt-4 btn btn-lg btn-danger btn-block" type="submit">Save Profile</button><a href="{% url 'login' %}"> or cancel</a>
+      </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+
+<script>
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function() {
+  'use strict';
+  window.addEventListener('load', function() {
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.getElementsByClassName('needs-validation');
+    // Loop over them and prevent submission
+    var validation = Array.prototype.filter.call(forms, function(form) {
+      form.addEventListener('submit', function(event) {
+        if (form.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+  }, false);
+})();
+
+window.setTimeout(function () {
+    $(".alert-success").fadeTo(500, 0).slideUp(500, function () {
+        $(this).remove();
+    });
+}, 5000);
+</script>
+
+
+{% endblock %}

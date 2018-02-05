@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.forms import ModelForm
 
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.db import models
+from .models import Profile
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -28,3 +30,9 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+class ProfileEditForm(ModelForm):
+    class Meta:
+        model = Profile
+        fields = ('bio',)

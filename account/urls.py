@@ -22,4 +22,5 @@ urlpatterns = [
     path('reset/done', AccountViewFactory.create_view('password_reset_complete'), name='password_reset_complete'),
     path('password-change/', AccountViewFactory.create_view('password_change'), name='password_change'),
     path('password-change/done', AccountViewFactory.create_view('password_change_done'), name='password_change_done'),
+    path('profile', AccountViewFactory.create_view('profile'), name='profile'),
 ]

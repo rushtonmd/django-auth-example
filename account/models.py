@@ -20,6 +20,10 @@ class Profile(models.Model):
 # Reference: https://docs.djangoproject.com/en/2.0/topics/signals/
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
+
+    # If the new user is created, also create a new Profile
     if created:
         Profile.objects.create(user=instance)
+
+    # Save the profile of the user (instance)
     instance.profile.save()
