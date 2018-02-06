@@ -18,7 +18,7 @@
 <div class="row justify-content-md-center">
   <div class="col-md-auto">
       <h1>Profile</h1>
-      <form class="m-1 form-signin needs-validation" method="post" action="" name="ProfileForm" enctype="multipart/form-data" novalidate>
+      <form class="m-1 form-signin needs-validation" method="post" action="" name="ProfileForm" id="profile-form" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
         <div class="form-group">
           <label for="inputEmail" class="">Email Address</label>
@@ -42,7 +42,7 @@
         <div class="invalid-feedback">
           Please enter a valid email address.
         </div>
-        <button class="mt-4 btn btn-lg btn-danger btn-block" type="submit">Save Profile</button><a href="{% url 'home' %}"> or cancel</a>
+        <button class="mt-4 btn btn-lg btn-danger btn-block" type="submit" id="form-submit">Save Profile</button><a href="{% url 'home' %}"> or cancel</a>
       </form>
     </div>
 </div>
@@ -71,11 +71,20 @@
   }, false);
 })();
 
-window.setTimeout(function () {
-    $(".alert-success").fadeTo(500, 0).slideUp(500, function () {
-        $(this).remove();
-    });
-}, 5000);
+window.onload=function() {
+    document.getElementById('profile-form').onsubmit=function() {
+    /* do what you want with the form */
+
+    let el = document.querySelector('#form-submit')
+
+    el.disabled = true;
+    el.innerText = "Saving..."
+    // Should be triggered on form submit
+    // alert('hi');
+    // You must return false to prevent the default form behavior
+    return true;
+  }
+}
 </script>
 
 
