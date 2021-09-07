@@ -17,7 +17,7 @@ matplotlib==2.1.2
 mccabe==0.6.1
 numpy==1.14.0
 pew==1.1.2
-Pillow==5.0.0
+Pillow==8.3.2
 pipenv==9.0.3
 psycopg2==2.7.3.2
 pycodestyle==2.3.1
